@@ -317,7 +317,7 @@ case "$continue_prod" in
     bench --site $site_name scheduler enable && \
     bench --site $site_name scheduler resume && \
 
-    echo -e "${YELLOW}Restarting bench to apply all changes and optimizing environment pernissions.${NC}"
+    echo -e "${YELLOW}Restarting bench to apply all changes and optimizing environment permissions.${NC}"
     sleep 1
 
     # Restart bench
@@ -331,10 +331,37 @@ case "$continue_prod" in
     printf "${NC}\n"
     sleep 3
 
+    # Now to add apps from input
+    echo -e "${LIGHT_BLUE}Would you like to continue with adding apps to this production install? (yes/no)${NC}"
+    read -p "Response: " add_apps
+    add_apps=$(echo "$add_apps" | tr '[:upper:]' '[:lower:]')  # Convert to lowercase
+    
+    case "$add_apps" in
+        "yes" | "y")
+    
+        # Prompt for app list delimited by comma
+        read -p "Type in the apps separated by comma (,): " app_list
+    
+        IFS=', ' read -r -a array <<< "$app_list"
+        for element in "${array[@]}"
+        do
+            echo -e "${YELLOW}Installing $element...${NC}"
+            bench --site $site_name get-app "$element" &&       
+            bench --site $site_name install-app "$element"
+            if [ $? -ne 0 ]; then
+                echo "Failed to install $element"
+                exit 1
+            fi
+        done
+        ;;
+        *)
+        echo -e "${RED}Skipping Apps installation...${NC}"
+        sleep 3
+        ;;
+    esac   
+
     echo -e "${YELLOW}Would you like to install SSL? (yes/no)${NC}"
-
     read -p "Response: " continue_ssl
-
     continue_ssl=$(echo "$continue_ssl" | tr '[:upper:]' '[:lower:]')  # Convert to lowercase
 
     case "$continue_ssl" in
