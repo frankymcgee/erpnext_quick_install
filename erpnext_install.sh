@@ -450,6 +450,14 @@ case "$continue_prod" in
         deactivate
     fi
 
+    # Set the default site to be used
+    echo -e "${YELLOW}Setting Default Site Use---${NC}"
+    sleep 2
+    bench use $site_name
+    echo -e "${GREEN}Site set successfully.${NC}"
+
+    
+
     echo -e "${GREEN}--------------------------------------------------------------------------------"
     echo -e "Congratulations! You have successfully installed ERPNext $version_choice."
     echo -e "You can start using your new ERPNext installation by visiting https://$site_name"
